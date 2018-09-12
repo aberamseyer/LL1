@@ -4,6 +4,7 @@ import java.util.stream.Collectors;
 /**
  * This class implements an LL1 parser that checks a 'program' given as a command line argument for syntax errors based on its defined grammar.
  * It uses the recursive-descent (top-down) approach.
+ * Prints "Yes" if syntax follows the given ruleset, otherwise prints "No"
  *
  * @author Abe Ramseyer
  */
@@ -14,12 +15,17 @@ public class LL1 {
     /* used for validating characters as numeric */
     static final String numbers = "0123456789";
 
+    /**
+     * Program entry point. Performs basic input validation and calls methods to parse the input.
+     * @param the 'code' string to parse for validity
+     */
     public static void main(String[] args) {
         // basic input validation
         if (args.length != 1) {
             System.err.println("Usage: java LL1 \"CODE\"");
             System.exit(1);
         }
+
         // add everything from the input to the queue for reading from while parsing
         code = args[0].chars().mapToObj(c -> (char) c)
                 .collect(Collectors.toCollection(LinkedList::new));
@@ -34,6 +40,9 @@ public class LL1 {
         System.out.println("Yes");
     }
 
+    /**
+     * rule E
+     */
     static void e() {
         switch (code.peek()) {
             case '0': case '1': case '2': case '3': case '4': case '5': case '6': case '7': case '8': case '9':
@@ -45,6 +54,9 @@ public class LL1 {
         }
     }
 
+    /**
+     * rule E'
+     */
     static void ePrime() {
         switch (code.peek()) {
             case '+':
@@ -64,6 +76,9 @@ public class LL1 {
         }
     }
 
+    /**
+     * rule T
+     */
     static void t() {
         switch (code.peek()) {
             case '0': case '1': case '2': case '3': case '4': case '5': case '6': case '7': case '8': case '9':
@@ -75,6 +90,9 @@ public class LL1 {
         }
     }
 
+    /**
+     * rule T'
+     */
     static void tPrime() {
         switch (code.peek()) {
             case '+':
@@ -96,6 +114,9 @@ public class LL1 {
         }
     }
 
+    /**
+     * rule F
+     */
     static void f() {
         switch (code.peek()) {
             case '0': case '1': case '2': case '3': case '4': case '5': case '6': case '7': case '8': case '9':
@@ -110,12 +131,13 @@ public class LL1 {
         }
     }
 
-    /*
-        removes a token from the input string. A token is either a symbol or a number, as seen in the two conditions
+    /**
+     * removes a token from the input string. A token is either a symbol or a number, as seen in the two conditions
+     * @param expected the character we expect to see if syntax is valid
      */
     static void get(char expected) {
         char next = code.poll();
-        if (expected == 'n' && numbers.indexOf(next) != -1) { // check for a number
+        if (expected == 'n' && numbers.substring(1).indexOf(next) != -1) { // check for a number without a leading '0'
             while (numbers.indexOf(code.peek()) != -1) // remove any remaining digits of the same number
                 code.poll();
             return;
@@ -128,10 +150,10 @@ public class LL1 {
     }
 
     /*
-        If at any time a mismatch is detected, this method is called
+     *  If at any time a mismatch is detected, this method is called to print "No" and exit the program
      */
     static void no() {
         System.out.println("No");
-        System.exit(2);
+        System.exit(0);
     }
 }
